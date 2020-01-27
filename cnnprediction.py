@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from feedFromCsv import feedFromCsv
 import matplotlib.pyplot as plt
 
-
+# normalize data
 def processData(data, timePortion):
     trainX = []
     trainY = []
@@ -25,6 +25,7 @@ def processData(data, timePortion):
 
     return np.asarray(trainX), np.asarray(trainY)
 
+# auxiliary function
 def generateNextDayPrediction(data, timePortion):
     size = len(data)
     features = []
@@ -34,17 +35,19 @@ def generateNextDayPrediction(data, timePortion):
 
     return np.asarray(features)
 
-
+# number of days in a batch
 timePortion = 7
+# import stock data
 df = feedFromCsv('cdr')
 originalData = df.loc[:,'Close'].to_numpy()
+# form train and validation data
 trainX, trainY = processData(df[:900], timePortion)
 testX, testY = processData(df[900:], timePortion)
 
-nextDayPrediction = generateNextDayPrediction(originalData, timePortion)
 
 
 
+# build neural network
 model = models.Sequential()
 model.add(layers.Conv1D(128, 2, activation='relu', input_shape=(7, 1)))
 model.add(layers.AveragePooling1D(2, 1))
@@ -54,10 +57,13 @@ model.add(layers.Flatten())
 model.add(layers.Dense(1))
 
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae', 'mse'])
+# train and validate
 history = model.fit(trainX.reshape(-1, timePortion, 1), trainY, epochs=100, validation_data=(testX.reshape(-1, timePortion, 1), testY))
 
 # predictedX = model.predict(trainX.reshape(-1, timePortion, 1))
 
+# Predict stock for next day
+# nextDayPrediction = generateNextDayPrediction(originalData, timePortion)
 # scaler = MinMaxScaler()
 # scaler.fit(nextDayPrediction.reshape(-1, 1))
 # nextDayPredictionScaled = scaler.transform(nextDayPrediction.reshape(-1, 1)).reshape(-1)
