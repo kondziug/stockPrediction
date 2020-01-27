@@ -15,8 +15,8 @@ def processData(data, timePortion):
     features = data.loc[:,'Close'].to_numpy()
     features = features.reshape(-1, 1)
     scaler = MinMaxScaler()
-    scaler.fit(features) # ??????????????????
-    scaledFeatures = scaler.transform(features).reshape(-1) # ??????????????????????
+    scaler.fit(features)
+    scaledFeatures = scaler.transform(features).reshape(-1)
 
     for i in range(timePortion, size):
         for j in range(i - timePortion, i):
@@ -68,7 +68,7 @@ history = model.fit(trainX.reshape(-1, timePortion, 1), trainY, epochs=100, vali
 
 # print(f'predicted value for next day: {inversePredictedValue}')
 
-
+# Plot learning rate
 # plt.plot(history.history['mean_squared_error'], "b--", label="MSE dla danych uczących")
 # plt.plot(history.history['mean_absolute_error'], "g--", label="MAE of training data")
 # plt.plot(history.history['val_mean_squared_error'], "b", label="MSE dla danych walidacyjnych")
