@@ -1,4 +1,4 @@
-# stockPrediction
+# Stock Prediction
 
 Simple comparison of 2 well known prediction algorithms: Long Short Term Memory and Convolutional Neural Networks. 
 Experiments done on polish WIG20 stock data. The performance criterion was Mean Squared Error on validation data.
