@@ -1,4 +1,3 @@
-# from pandas_datareader import data ????
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
@@ -14,10 +13,9 @@ from datageneratorseq import DataGeneratorSeq
 
 df = feedFromCsv('tpe')
 
-high_prices = df.loc[:,'High'].to_numpy() # changed from as_matrix()
-low_prices = df.loc[:,'Low'].to_numpy() # changed from as_matrix()
+high_prices = df.loc[:,'High'].to_numpy()
+low_prices = df.loc[:,'Low'].to_numpy()
 mid_prices = (high_prices+low_prices)/2.0
-# mid_prices = df.loc[:,'Close'].to_numpy()
 
 train_data = mid_prices[:900] 
 test_data = mid_prices[900:]
@@ -26,12 +24,12 @@ scaler = MinMaxScaler()
 train_data = train_data.reshape(-1,1)
 test_data = test_data.reshape(-1,1)
 
-smoothing_window_size = 250 # watch out!!!!!!!!!!!!!!!!!!!!!!
+smoothing_window_size = 250 
 for di in range(0,750,smoothing_window_size):
   scaler.fit(train_data[di:di+smoothing_window_size,:])
   train_data[di:di+smoothing_window_size,:] = scaler.transform(train_data[di:di+smoothing_window_size,:])
 
-# You normalize the last bit of remaining data
+# Normalize the last bit of remaining data
 scaler.fit(train_data[di+smoothing_window_size:,:])
 train_data[di+smoothing_window_size:,:] = scaler.transform(train_data[di+smoothing_window_size:,:])
 
@@ -42,7 +40,7 @@ train_data = train_data.reshape(-1)
 test_data = scaler.transform(test_data).reshape(-1)
 
 
-##########################################################################################################################################
+
 EMA = 0.0
 gamma = 0.1
 for ti in range(900):
@@ -53,18 +51,18 @@ for ti in range(900):
 all_mid_data = np.concatenate([train_data,test_data],axis=0)
 
 D = 1 # Dimensionality of the data. Since your data is 1-D this would be 1
-num_unrollings = 50 # Number of time steps you look into the future.
+num_unrollings = 50 # Number of time steps look into the future.
 batch_size = 50 # Number of samples in a batch
-num_nodes = [200,200,150] # Number of hidden nodes in each layer of the deep LSTM stack we're using
+num_nodes = [200,200,150] # Number of hidden nodes in each layer of the deep LSTM stack 
 n_layers = len(num_nodes) # number of layers
 dropout = 0.2 # dropout amount
 
-tf.reset_default_graph() # This is important in case you run this multiple times
+tf.reset_default_graph() 
 
 # Input data.
 train_inputs, train_outputs = [],[]
 
-# You unroll the input over time defining placeholders for each time step
+# Unroll the input over time defining placeholders for each time step
 for ui in range(num_unrollings):
     train_inputs.append(tf.placeholder(tf.float32, shape=[batch_size,D],name='train_inputs_%d'%ui))
     train_outputs.append(tf.placeholder(tf.float32, shape=[batch_size,1], name = 'train_outputs_%d'%ui))
@@ -94,7 +92,6 @@ for li in range(n_layers):
   initial_state.append(tf.contrib.rnn.LSTMStateTuple(c[li], h[li]))
 
 # Do several tensor transofmations, because the function dynamic_rnn requires the output to be of
-# a specific format. Read more at: https://www.tensorflow.org/api_docs/python/tf/nn/dynamic_rnn
 all_inputs = tf.concat([tf.expand_dims(t,0) for t in train_inputs],axis=0)
 
 # all_outputs is [seq_length, batch_size, num_nodes]
@@ -108,9 +105,6 @@ all_outputs = tf.nn.xw_plus_b(all_lstm_outputs,w,b)
 
 split_outputs = tf.split(all_outputs,num_unrollings,axis=0)
 
-# When calculating the loss you need to be careful about the exact form, because you calculate
-# loss of all the unrolled steps at the same time
-# Therefore, take the mean error or each batch and get the sum of that over all the unrolled steps
 
 print('Defining training Loss')
 loss = 0.0
@@ -161,9 +155,9 @@ with tf.control_dependencies([tf.assign(sample_c[li],sample_state[li][0]) for li
 
 
 epochs = 30
-valid_summary = 1 # Interval you make test predictions
+valid_summary = 1 # Interval to make test predictions
 
-n_predict_once = 5 # Number of steps you continously predict for
+n_predict_once = 5 # Number of steps for prediction
 
 train_seq_length = train_data.size # Full length of the training data
 
@@ -187,7 +181,7 @@ data_gen = DataGeneratorSeq(train_data,batch_size,num_unrollings)
 
 x_axis_seq = []
 
-# Points you start our test predictions from
+# Points from which predictions start
 test_points_seq = np.arange(900, 1000, 5).tolist()
 
 best_mse_all_episodes = 10
@@ -299,7 +293,6 @@ for ep in range(20):
 
 print(f'best MSE for all episodes: {best_mse_all_episodes}')
 
-# best_prediction_epoch = 1 # replace this with the epoch that you got the best results when running the plotting code
 
 # plt.figure(figsize = (18,18))
 # plt.subplot(2,1,1)
@@ -322,7 +315,7 @@ print(f'best MSE for all episodes: {best_mse_all_episodes}')
 
 # plt.subplot(2,1,2)
 
-# # Predicting the best test prediction you got
+# # Predicting the best test prediction 
 # plt.plot(range(df.shape[0]),all_mid_data,color='b')
 # for xval,yval in zip(x_axis_seq,predictions_over_time[best_prediction_epoch]):
 #     plt.plot(xval,yval,color='r')
